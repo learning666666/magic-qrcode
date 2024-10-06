@@ -1,22 +1,91 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>魔术效果</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Magic QR Code</title>
+    <style>
+        /* 禁止缩放 */
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: url('background.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* 添加图片样式 */
+        #photo {
+            position: absolute;
+            width: 20%; /* 初始照片大小为原始大小的20% */
+            cursor: pointer;
+            transition: transform 0.3s, opacity 0.3s, width 0.3s;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <div id="qrCode" class="qrcode">
-            <img src="qrcode.png" alt="二维码" />
-        </div>
-        <div id="heart" class="heart" style="display: none;"></div>
-        <div id="photo" class="photo" style="display: none;">
-            <img src="photo.jpg" alt="照片">
-        </div>
-    </div>
-    <script src="script.js"></script>
+    <img id="photo" src="photo.jpg" alt="Photo" style="display: none;">
+
+    <button id="addFriendBtn" style="position: absolute; top: 80%; left: 50%; transform: translateX(-50%);">
+        添加到通讯录
+    </button>
+
+    <script>
+        const addFriendBtn = document.getElementById('addFriendBtn');
+        const photo = document.getElementById('photo');
+        let isDragging = false;
+        let offsetX, offsetY;
+        const maxPhotoWidth = 100;  // 正常显示照片时的最大宽度（100%）
+        let currentPhotoWidth = 20; // 初始宽度为20%
+
+        // 点击按钮显示照片
+        addFriendBtn.addEventListener('click', function() {
+            photo.style.display = 'block';
+            photo.style.left = '50%';
+            photo.style.top = '50%';
+            photo.style.transform = 'translate(-50%, -50%)';
+        });
+
+        // 点击图片放大，最多到100%
+        photo.addEventListener('click', function() {
+            if (currentPhotoWidth < maxPhotoWidth) {
+                currentPhotoWidth += 20; // 每次点击放大20%
+                if (currentPhotoWidth > maxPhotoWidth) {
+                    currentPhotoWidth = maxPhotoWidth; // 限制最大值
+                }
+                photo.style.width = currentPhotoWidth + '%'; // 按百分比设置大小
+            }
+        });
+
+        // 拖动开始
+        photo.addEventListener('mousedown', function(event) {
+            isDragging = true;
+            offsetX = event.clientX - photo.offsetLeft;
+            offsetY = event.clientY - photo.offsetTop;
+        });
+
+        document.addEventListener('mousemove', function(event) {
+            if (isDragging) {
+                photo.style.left = event.clientX - offsetX + 'px';
+                photo.style.top = event.clientY - offsetY + 'px';
+                
+                // 检查是否拖出屏幕
+                const photoRect = photo.getBoundingClientRect();
+                if (
+                    photoRect.right < 0 ||
+                    photoRect.bottom < 0 ||
+                    photoRect.left > window.innerWidth ||
+                    photoRect.top > window.innerHeight
+                ) {
+                    photo.style.opacity = '0'; // 拖出屏幕后渐隐
+                    setTimeout(() => { photo.style.display = 'none'; }, 300);
+                    isDragging = false; // 停止拖动
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+    </script>
 </body>
 </html>
-
