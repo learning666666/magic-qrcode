@@ -20,25 +20,33 @@
             cursor: pointer;
             transition: transform 0.3s, opacity 0.3s, width 0.3s;
         }
+
+        /* 小图标样式 */
+        #addFriendIcon {
+            position: absolute;
+            top: 80%; 
+            left: 50%; 
+            transform: translateX(-50%);
+            width: 50px; /* 图标大小 */
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <img id="photo" src="photo.jpg" alt="Photo" style="display: none;">
-
-    <button id="addFriendBtn" style="position: absolute; top: 80%; left: 50%; transform: translateX(-50%);">
-        添加到通讯录
-    </button>
+    <!-- 使用图标替代按钮 -->
+    <img id="addFriendIcon" src="icon.jpg" alt="Add Friend Icon">
 
     <script>
-        const addFriendBtn = document.getElementById('addFriendBtn');
+        const addFriendIcon = document.getElementById('addFriendIcon');
         const photo = document.getElementById('photo');
         let isDragging = false;
         let offsetX, offsetY;
         const maxPhotoWidth = 100;  // 正常显示照片时的最大宽度（100%）
         let currentPhotoWidth = 20; // 初始宽度为20%
 
-        // 点击按钮显示照片
-        addFriendBtn.addEventListener('click', function() {
+        // 点击图标显示照片
+        addFriendIcon.addEventListener('click', function() {
             photo.style.display = 'block';
             photo.style.left = '50%';
             photo.style.top = '50%';
@@ -56,18 +64,32 @@
             }
         });
 
-        // 拖动开始
-        photo.addEventListener('mousedown', function(event) {
+        // 为拖动图片添加支持鼠标和手指事件
+        const startDrag = function(event) {
             isDragging = true;
-            offsetX = event.clientX - photo.offsetLeft;
-            offsetY = event.clientY - photo.offsetTop;
-        });
+            if (event.type === 'mousedown') {
+                offsetX = event.clientX - photo.offsetLeft;
+                offsetY = event.clientY - photo.offsetTop;
+            } else if (event.type === 'touchstart') {
+                offsetX = event.touches[0].clientX - photo.offsetLeft;
+                offsetY = event.touches[0].clientY - photo.offsetTop;
+            }
+        };
 
-        document.addEventListener('mousemove', function(event) {
+        const moveDrag = function(event) {
             if (isDragging) {
-                photo.style.left = event.clientX - offsetX + 'px';
-                photo.style.top = event.clientY - offsetY + 'px';
-                
+                let clientX, clientY;
+                if (event.type === 'mousemove') {
+                    clientX = event.clientX;
+                    clientY = event.clientY;
+                } else if (event.type === 'touchmove') {
+                    clientX = event.touches[0].clientX;
+                    clientY = event.touches[0].clientY;
+                }
+
+                photo.style.left = clientX - offsetX + 'px';
+                photo.style.top = clientY - offsetY + 'px';
+
                 // 检查是否拖出屏幕
                 const photoRect = photo.getBoundingClientRect();
                 if (
@@ -81,11 +103,22 @@
                     isDragging = false; // 停止拖动
                 }
             }
-        });
+        };
 
-        document.addEventListener('mouseup', function() {
+        const endDrag = function() {
             isDragging = false;
-        });
+        };
+
+        // 鼠标事件
+        photo.addEventListener('mousedown', startDrag);
+        document.addEventListener('mousemove', moveDrag);
+        document.addEventListener('mouseup', endDrag);
+
+        // 触摸事件
+        photo.addEventListener('touchstart', startDrag);
+        document.addEventListener('touchmove', moveDrag);
+        document.addEventListener('touchend', endDrag);
+
     </script>
 </body>
 </html>
