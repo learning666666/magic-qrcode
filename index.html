@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic QR Code</title>
+    <title>Magic Photo</title>
     <style>
         /* 禁止缩放 */
         body {
@@ -28,7 +28,7 @@
             top: 80%; 
             left: 50%; 
             transform: translateX(-50%);
-            width: 100px; /* 图标大小 */
+            width: 50px; /* 图标大小 */
             cursor: pointer;
             z-index: 20; /* 确保图标在其他元素之上 */
         }
@@ -43,9 +43,10 @@
         const addFriendIcon = document.getElementById('addFriendIcon');
         const photo = document.getElementById('photo');
         let isDragging = false;
-        let offsetX, offsetY;
+        let startX, startY;
         const maxPhotoWidth = 100;  // 正常显示照片时的最大宽度（100%）
         let currentPhotoWidth = 20; // 初始宽度为20%
+        const dragThreshold = 100; // 拖动阈值，超过此距离自动消失
 
         // 点击图标显示照片
         addFriendIcon.addEventListener('click', function() {
@@ -66,61 +67,33 @@
             }
         });
 
-        // 为拖动图片添加支持鼠标和手指事件
-        const startDrag = function(event) {
+        // 拖动开始
+        photo.addEventListener('mousedown', function(event) {
             isDragging = true;
-            if (event.type === 'mousedown') {
-                offsetX = event.clientX - photo.offsetLeft;
-                offsetY = event.clientY - photo.offsetTop;
-            } else if (event.type === 'touchstart') {
-                offsetX = event.touches[0].clientX - photo.offsetLeft;
-                offsetY = event.touches[0].clientY - photo.offsetTop;
-            }
-        };
+            startX = event.clientX;
+            startY = event.clientY;
+        });
 
-        const moveDrag = function(event) {
+        document.addEventListener('mousemove', function(event) {
             if (isDragging) {
-                let clientX, clientY;
-                if (event.type === 'mousemove') {
-                    clientX = event.clientX;
-                    clientY = event.clientY;
-                } else if (event.type === 'touchmove') {
-                    clientX = event.touches[0].clientX;
-                    clientY = event.touches[0].clientY;
-                }
-
                 // 更新图片位置
-                photo.style.left = clientX - offsetX + 'px';
-                photo.style.top = clientY - offsetY + 'px';
+                photo.style.left = event.clientX - (photo.offsetWidth / 2) + 'px';
+                photo.style.top = event.clientY - (photo.offsetHeight / 2) + 'px';
+            }
+        });
 
-                // 检查是否拖出屏幕
-                const photoRect = photo.getBoundingClientRect();
-                if (
-                    photoRect.right < 0 ||
-                    photoRect.bottom < 0 ||
-                    photoRect.left > window.innerWidth ||
-                    photoRect.top > window.innerHeight
-                ) {
-                    photo.style.opacity = '0'; // 拖出屏幕后渐隐
-                    setTimeout(() => { photo.style.display = 'none'; }, 300);
-                    isDragging = false; // 停止拖动
+        document.addEventListener('mouseup', function(event) {
+            if (isDragging) {
+                const dragDistance = Math.sqrt(Math.pow(event.clientX - startX, 2) + Math.pow(event.clientY - startY, 2));
+                
+                // 如果拖动距离超过阈值，照片消失
+                if (dragDistance > dragThreshold) {
+                    photo.style.opacity = '0'; // 渐隐
+                    setTimeout(() => { photo.style.display = 'none'; }, 300); // 延时消失
                 }
             }
-        };
-
-        const endDrag = function() {
             isDragging = false;
-        };
-
-        // 鼠标事件
-        photo.addEventListener('mousedown', startDrag);
-        document.addEventListener('mousemove', moveDrag);
-        document.addEventListener('mouseup', endDrag);
-
-        // 触摸事件
-        photo.addEventListener('touchstart', startDrag);
-        document.addEventListener('touchmove', moveDrag);
-        document.addEventListener('touchend', endDrag);
+        });
     </script>
 </body>
 </html>
