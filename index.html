@@ -9,7 +9,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background: url('background.jpg') no-repeat center center fixed;
+            background: url('background.jpg') no-repeat center center fixed; /* 确保背景固定 */
             background-size: cover;
         }
 
@@ -19,6 +19,7 @@
             width: 20%; /* 初始照片大小为原始大小的20% */
             cursor: pointer;
             transition: transform 0.3s, opacity 0.3s, width 0.3s;
+            z-index: 10; /* 确保照片在其他元素之上 */
         }
 
         /* 小图标样式 */
@@ -27,8 +28,9 @@
             top: 80%; 
             left: 50%; 
             transform: translateX(-50%);
-            width: 50px; /* 图标大小 */
+            width: 100px; /* 图标大小 */
             cursor: pointer;
+            z-index: 20; /* 确保图标在其他元素之上 */
         }
     </style>
 </head>
@@ -36,7 +38,6 @@
     <img id="photo" src="photo.jpg" alt="Photo" style="display: none;">
     <!-- 使用图标替代按钮 -->
     <img id="addFriendIcon" src="icon.jpg" alt="Add Friend Icon">
-
 
     <script>
         const addFriendIcon = document.getElementById('addFriendIcon');
@@ -88,6 +89,7 @@
                     clientY = event.touches[0].clientY;
                 }
 
+                // 更新图片位置
                 photo.style.left = clientX - offsetX + 'px';
                 photo.style.top = clientY - offsetY + 'px';
 
@@ -119,7 +121,6 @@
         photo.addEventListener('touchstart', startDrag);
         document.addEventListener('touchmove', moveDrag);
         document.addEventListener('touchend', endDrag);
-
     </script>
 </body>
 </html>
