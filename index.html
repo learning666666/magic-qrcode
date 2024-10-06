@@ -68,21 +68,33 @@
         });
 
         // 拖动开始
-        photo.addEventListener('mousedown', function(event) {
+        function startDrag(event) {
             isDragging = true;
-            startX = event.clientX;
-            startY = event.clientY;
-        });
+            startX = event.clientX || event.touches[0].clientX; // 使用触控时的坐标
+            startY = event.clientY || event.touches[0].clientY; // 使用触控时的坐标
 
-        document.addEventListener('mousemove', function(event) {
+            // 记录照片初始位置
+            photo.style.transition = 'none'; // 禁用过渡以便瞬间移动
+        }
+
+        // 拖动过程中
+        function drag(event) {
             if (isDragging) {
+                const clientX = event.clientX || event.touches[0].clientX; // 使用触控时的坐标
+                const clientY = event.clientY || event.touches[0].clientY; // 使用触控时的坐标
+                
                 // 更新图片位置
-                photo.style.left = event.clientX - (photo.offsetWidth / 2) + 'px';
-                photo.style.top = event.clientY - (photo.offsetHeight / 2) + 'px';
+                photo.style.left = (photo.offsetLeft + (clientX - startX)) + 'px';
+                photo.style.top = (photo.offsetTop + (clientY - startY)) + 'px';
+                
+                // 更新初始位置为当前鼠标位置
+                startX = clientX;
+                startY = clientY;
             }
-        });
+        }
 
-        document.addEventListener('mouseup', function(event) {
+        // 拖动结束
+        function endDrag(event) {
             if (isDragging) {
                 const dragDistance = Math.sqrt(Math.pow(event.clientX - startX, 2) + Math.pow(event.clientY - startY, 2));
                 
@@ -93,7 +105,18 @@
                 }
             }
             isDragging = false;
-        });
+            photo.style.transition = ''; // 恢复过渡效果
+        }
+
+        // 添加鼠标和触摸事件
+        photo.addEventListener('mousedown', startDrag);
+        photo.addEventListener('touchstart', startDrag);
+
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag);
+
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
     </script>
 </body>
 </html>
